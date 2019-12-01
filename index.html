@@ -10,6 +10,14 @@
     <link rel="stylesheet" href="css/autocomplete-style.css" />
   </head>
   <body>
+    <img
+      src="iusable.svg"
+      alt="iusable"
+      class="uk-animation-toggle"
+      uk-svg="stroke-animation: true"
+      style="width:150px;
+      padding:25px;"
+    />
     <div class="uk-container uk-container-xsmall">
       <div id="app">
         <h1>Strafrecht {{exercise}} Trainer</h1>
@@ -46,7 +54,23 @@
         <button class="uk-button uk-button-primary" v-on:click="control">
           Kontrollieren
         </button>
+        <button class="uk-button uk-button-danger" v-on:click="erase">
+          Übung zurücksetzen
+        </button>
+        <button class="uk-button uk-button-default" v-on:click="load">
+          Neue Übung
+        </button>
       </div>
+    </div>
+    <hr />
+    <div style="text-align:center;" class="uk-container uk-container-xsmall">
+      <br />
+      Dieser Trainer soll das spielerische Üben von Schemata und Definitionen
+      ermöglichen. Für Hinweise auf Fehler oder für Verbesserungsvorschläge sind
+      wir sehr dankbar.<br />
+      Die Inhalte der Übungen stammen von Studierenden an der Universität Basel
+      und
+      <b> erheben keinen Anspruch auf Richtigkeit oder Aktualität.</b>
     </div>
     <!-- VUE JS TODO: Load internally-->
     <script src="js/vue.js"></script>
@@ -79,7 +103,11 @@
           this.load();
         },
         methods: {
+          erase() {
+            this.entries = [];
+          },
           load() {
+            this.entries = [];
             console.log("LOADING...");
             let self = this; //Promise function can not access this. so we add this to self.
             if (this.exercise === "Schemata") {
@@ -138,8 +166,7 @@
               console.log("it currently is" + this.exercise);
               this.exercise = "Schemata";
               console.log("it changed to" + this.exercise);
-              this.result =
-                "Wähle die korrenten Definitionsteile aus und bringe sie in die richtie Reihenfolge";
+              this.result = "Wähle die korrenten Definitionsteile aus.";
             } else {
               console.log("it currently is" + this.exercise);
 
@@ -164,18 +191,40 @@
               userArray.push(element.textContent.trim());
             });
             let result = true;
-            goalArray.forEach(function(e, i) {
-              if (e === userArray[i]) {
-                console.log("correct");
-                document.getElementsByClassName("entry")[i].style.border =
-                  "5px solid #AAFF80";
+            if (this.exercise === "Schemata") {
+              console.log("controlling Schemata");
+              goalArray.forEach(function(e, i) {
+                if (e === userArray[i]) {
+                  console.log("correct");
+                  document.getElementsByClassName("entry")[i].style.border =
+                    "5px solid #AAFF80";
+                } else {
+                  document.getElementsByClassName("entry")[i].style.border =
+                    "5px solid #F04F6E";
+                  console.log(false);
+                  result = false;
+                }
+              });
+            } else {
+              console.log("controlling Definition");
+
+              //For definitions order isn't not important...
+              if (goalArray.length == userArray.length) {
+                goalArray.forEach(function(e, i) {
+                  if (!userArray.includes(e)) {
+                    result = false;
+                    document.getElementsByClassName("entry")[i].style.border =
+                      "5px solid #F05F6E";
+                  } else {
+                    document.getElementsByClassName("entry")[i].style.border =
+                      "5px solid #AAFF80";
+                  }
+                });
               } else {
-                document.getElementsByClassName("entry")[i].style.border =
-                  "5px solid #F04F6E";
-                console.log(false);
-                result = false;
+                console.log("Not enough entries");
+                getElements;
               }
-            });
+            }
             if (result) {
               this.result = "Herzlichen Glückwunsch! Das ist richtig!";
             } else {
