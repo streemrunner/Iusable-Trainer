@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Iusable - Strafrecht Trainer</title>
+    <!-- UIkit CSS -->
+    <link rel="stylesheet" href="css/uikit.min.css" />
+    <link rel="stylesheet" href="css/autocomplete-style.css" />
+  </head>
+  <body>
+    <div class="uk-container uk-container-xsmall">
+      <div id="app">
+        <h1>Strafrecht {{exercise}} Trainer</h1>
+        <button v-on:click="changeExercise" class="uk-button uk-button-default">
+          Übung ändern
+        </button>
+        <p>
+          {{result}}. Hier ist Deine nächste Aufgabe:
+        </p>
+        <div
+          class="uk-card uk-card-default uk-card-body uk-margin"
+          style="border:5px solid grey; padding:25px !important;"
+        >
+          {{ task.task }}
+        </div>
+        <div id="autocomplete" class="autocomplete">
+          <input class="autocomplete-input" id="input" placeholder="..." />
+          <ul class="autocomplete-result-list"></ul>
+        </div>
+        <div class="uk-margin" uk-sortable>
+          <div
+            v-for="entry in entries"
+            class="uk-card uk-card-default uk-card-body uk-margin entry"
+            style="padding:15px !important;"
+          >
+            <span
+              class="uk-sortable-handle uk-margin-small-right"
+              uk-icon="icon: table"
+            ></span>
+            {{entry.text}}
+          </div>
+        </div>
+        {{result}}
+      </div>
+      <button class="uk-button uk-button-primary" onclick="control()">
+        Kontrollieren
+      </button>
+    </div>
+    <!-- VUE JS TODO: Load internally-->
+    <script src="js/vue.js"></script>
+    <!-- UIkit JS -->
+    <script src="js/uikit.min.js"></script>
+    <script src="js/uikit-icons.min.js"></script>
+    <script src="js/autocomplete.min.js"></script>
+    <script>
+      //Global Variables
+      let TrainingTask;
+      let possibleEntries;
+      let possibleEntriesDefinitionen = [
+        "Besondere Grausamkeit/Heimtücke",
+        "Gesamtwürdigung"
+      ];
+      let possibleEntriesSchemata = [
+        "Objektiver Tatbestand",
+        "Taterfolg",
+        "Subjektiver Tatbestand",
+        "Vorstatz",
+        "Rechtswidrigkeit",
+        "Schuld",
+        "Ergebnis"
+      ];
+      //Training tasks
+      let tasks;
+      let tasksDefinitionen = [
+        {
+          task: "Definition: Skrupellosigkeit",
+          order: ["Besondere Grausamkeit/Heimtücke", "Gesamtwürdigung"]
+        }
+      ];
+      let tasksSchemata = [
+        {
+          task: "Vorsätzliche Tötung",
+          order: [
+            "Objektiver Tatbestand",
+            "Taterfolg",
+            "Subjektiver Tatbestand",
+            "Vorstatz",
+            "Rechtswidrigkeit",
+            "Schuld",
+            "Ergebnis"
+          ]
+        },
+        {
+          task: "Obj Subj",
+          order: ["Objektiver Tatbestand", "Subjektiver Tatbestand"]
+        }
+      ];
+
+      //setDefault
+      tasks = tasksSchemata;
+      possibleEntries = possibleEntriesSchemata;
+
+      //Start Vue
+      var app = new Vue({
+        el: "#app",
+        data: {
+          exercise: "Schemata",
+          entries: [],
+          task: {},
+          result:
+            "Wähle die korrekten Tatbestandsmerkmale aus und bringe sie in die richtige Reihenfolge"
+        },
+
+        methods: {
+          changeExercise() {
+            if (this.exercise === "Definitionen") {
+              this.exercise = "Schemata";
+              this.result =
+                "Wähle die korrenten Definitionsteile aus und bringe sie in die richtie Reihenfolge";
+              possibleEntries = possibleEntriesSchemata;
+              tasks = tasksSchemata;
+              //Set Training Task
+              TrainingTask = tasks[Math.floor(Math.random() * tasks.length)];
+              console.log(TrainingTask);
+              app.task = TrainingTask;
+            } else {
+              this.exercise = "Definitionen";
+              this.result =
+                "Wähle die korrekten Tatbestandsmerkmale aus und bringe sie in die richtige Reihenfolge";
+              possibleEntries = possibleEntriesDefinitionen;
+              tasks = tasksDefinitionen;
+              //Set Training Task
+              TrainingTask = tasks[Math.floor(Math.random() * tasks.length)];
+              console.log(TrainingTask);
+              app.task = TrainingTask;
+            }
+            this.entries = [];
+          }
+        }
+      });
+
+      //Autocomplete
+
+      let options = {
+        search: input => {
+          if (input.length < 1) {
+            return [];
+          }
+          return possibleEntries.filter(entry => {
+            return entry.toLowerCase().startsWith(input.toLowerCase());
+          });
+        },
+        onSubmit: result => {
+          //add data to vue App
+          app.entries.push({ text: result });
+          document.getElementById("input").value = "";
+        }
+      };
+      new Autocomplete("#autocomplete", options);
+
+      //Set Training Task
+      if (!!!TrainingTask) {
+        TrainingTask = tasks[Math.floor(Math.random() * tasks.length)];
+        console.log(TrainingTask);
+        app.task = TrainingTask;
+      }
+
+      //Control
+      function control() {
+        let goalArray = TrainingTask.order;
+        let userArray = [];
+        //populate userArray:
+        let allElements = document.getElementsByClassName("entry"); //returns HTML-Collection, not array
+        var arr = [].slice.call(allElements); //Converting to Array.
+        arr.forEach(element => {
+          userArray.push(element.textContent.trim());
+        });
+        let result = true;
+        goalArray.forEach(function(e, i) {
+          if (e === userArray[i]) {
+            console.log("correct");
+            document.getElementsByClassName("entry")[i].style.border =
+              "5px solid #AAFF80";
+          } else {
+            document.getElementsByClassName("entry")[i].style.border =
+              "5px solid #F04F6E";
+            console.log(false);
+            result = false;
+          }
+        });
+        if (result) {
+          app.result = "Herzlichen Glückwunsch! Das ist richtig!";
+        } else {
+          app.result = "Etwas stimmt noch nicht ganz...";
+        }
+      }
+    </script>
+  </body>
+</html>

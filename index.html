@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Iusable - Strafrecht Trainer</title>
+    <!-- UIkit CSS -->
+    <link rel="stylesheet" href="css/uikit.min.css" />
+    <link rel="stylesheet" href="css/autocomplete-style.css" />
+  </head>
+  <body>
+    <div class="uk-container uk-container-xsmall">
+      <div id="app">
+        <h1>Strafrecht {{exercise}} Trainer</h1>
+        <button v-on:click="changeExercise" class="uk-button uk-button-default">
+          Übung ändern
+        </button>
+        <p>
+          {{result}}. Hier ist Deine nächste Aufgabe:
+        </p>
+        <div
+          class="uk-card uk-card-default uk-card-body uk-margin"
+          style="border:5px solid grey; padding:25px !important;"
+        >
+          {{ task.task }}
+        </div>
+        <div id="autocomplete" class="autocomplete">
+          <input class="autocomplete-input" id="input" placeholder="..." />
+          <ul class="autocomplete-result-list"></ul>
+        </div>
+        <div class="uk-margin" uk-sortable>
+          <div
+            v-for="entry in entries"
+            class="uk-card uk-card-default uk-card-body uk-margin entry"
+            style="padding:15px !important;"
+          >
+            <span
+              class="uk-sortable-handle uk-margin-small-right"
+              uk-icon="icon: table"
+            ></span>
+            {{entry.text}}
+          </div>
+        </div>
+        {{result}}
+        <button class="uk-button uk-button-primary" v-on:click="control">
+          Kontrollieren
+        </button>
+      </div>
+    </div>
+    <!-- VUE JS TODO: Load internally-->
+    <script src="js/vue.js"></script>
+    <!-- UIkit JS -->
+    <script src="js/uikit.min.js"></script>
+    <script src="js/uikit-icons.min.js"></script>
+    <script src="js/autocomplete.min.js"></script>
+    <script src="js/axios.min.js"></script>
+
+    <script>
+      //Start Vue
+      var app = new Vue({
+        el: "#app",
+
+        data() {
+          return {
+            exercise: "Schemata",
+            loaded: false,
+            entries: [],
+            task: {},
+            tasks: [],
+            TrainingTask: {},
+            possibleEntries: [],
+            result:
+              "Wähle die korrekten Tatbestandsmerkmale aus und bringe sie in die richtige Reihenfolge"
+          };
+        },
+        mounted() {
+          console.log("MOUNTING...");
+          this.load();
+        },
+        methods: {
+          load() {
+            console.log("LOADING...");
+            let self = this; //Promise function can not access this. so we add this to self.
+            if (this.exercise === "Schemata") {
+              console.log("loading schematas");
+              axios
+                .get(
+                  "https://colincarter.me/cp/api/collections/get/MerkmaleStGBSchema"
+                )
+                .then(function(response) {
+                  // response => (this.tasks = response.entries);
+                  let entries = response.data.entries;
+                  self.tasks = entries;
+
+                  let rand = Math.floor(Math.random() * entries.length);
+                  self.task = self.tasks[rand];
+                  //Possible Entries
+                  let possibleEntries = ["Platzhalter"];
+                  entries.forEach(element => {
+                    element.order.forEach(element => {
+                      //No idea if there's a better option... there probably is...
+                      possibleEntries.push(element);
+                    });
+                  });
+                  self.possibleEntries = possibleEntries; // Set possible Entries.
+                  console.log(self.task);
+                });
+            } else {
+              console.log("loading definitions");
+
+              axios
+                .get(
+                  "https://colincarter.me/cp/api/collections/get/MerkmaleStGBDefinitionen"
+                )
+                .then(function(response) {
+                  // response => (this.tasks = response.entries);
+                  let entries = response.data.entries;
+                  self.tasks = entries;
+
+                  let rand = Math.floor(Math.random() * entries.length);
+                  self.task = self.tasks[rand];
+                  //Possible Entries
+                  let possibleEntries = ["Platzhalter"];
+                  entries.forEach(element => {
+                    element.order.forEach(element => {
+                      //No idea if there's a better option... there probably is...
+                      possibleEntries.push(element);
+                    });
+                  });
+                  self.possibleEntries = possibleEntries; // Set possible Entries.
+                  console.log(self.task);
+                });
+            }
+          },
+          changeExercise() {
+            if (this.exercise === "Definitionen") {
+              console.log("it currently is" + this.exercise);
+              this.exercise = "Schemata";
+              console.log("it changed to" + this.exercise);
+              this.result =
+                "Wähle die korrenten Definitionsteile aus und bringe sie in die richtie Reihenfolge";
+            } else {
+              console.log("it currently is" + this.exercise);
+
+              this.exercise = "Definitionen";
+              console.log("it changed to" + this.exercise);
+
+              this.result =
+                "Wähle die korrekten Tatbestandsmerkmale aus und bringe sie in die richtige Reihenfolge";
+            }
+            this.load();
+            console.log("Now it's" + this.exercise);
+            this.entries = [];
+          },
+          control() {
+            console.log("controlling...");
+            let goalArray = this.task.order;
+            let userArray = [];
+            //populate userArray:
+            let allElements = document.getElementsByClassName("entry"); //returns HTML-Collection, not array
+            var arr = [].slice.call(allElements); //Converting to Array.
+            arr.forEach(element => {
+              userArray.push(element.textContent.trim());
+            });
+            let result = true;
+            goalArray.forEach(function(e, i) {
+              if (e === userArray[i]) {
+                console.log("correct");
+                document.getElementsByClassName("entry")[i].style.border =
+                  "5px solid #AAFF80";
+              } else {
+                document.getElementsByClassName("entry")[i].style.border =
+                  "5px solid #F04F6E";
+                console.log(false);
+                result = false;
+              }
+            });
+            if (result) {
+              this.result = "Herzlichen Glückwunsch! Das ist richtig!";
+            } else {
+              this.result = "Etwas stimmt noch nicht ganz...";
+            }
+          }
+        }
+      });
+
+      //Autocomplete
+
+      let options = {
+        search: input => {
+          if (input.length < 1) {
+            return [];
+          }
+          return app.possibleEntries.filter(entry => {
+            return entry.toLowerCase().startsWith(input.toLowerCase());
+          });
+        },
+        onSubmit: result => {
+          //add data to vue App
+          app.entries.push({ text: result });
+          document.getElementById("input").value = "";
+        }
+      };
+      new Autocomplete("#autocomplete", options);
+
+      //Set Training Task
+      // if (!!!app.TrainingTask) {
+      //   app.TrainingTask = app.tasks[Math.floor(Math.random() * tasks.length)];
+      //   console.log(app.TrainingTask);
+      //   app.task = TrainingTask;
+      // }
+    </script>
+  </body>
+</html>
