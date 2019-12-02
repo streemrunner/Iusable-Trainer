@@ -57,7 +57,7 @@
         <button class="uk-button uk-button-danger" v-on:click="erase">
           Übung zurücksetzen
         </button>
-        <button class="uk-button uk-button-default" v-on:click="load">
+        <button class="uk-button uk-button-default" v-on:click="newExercise">
           Neue Übung
         </button>
       </div>
@@ -179,6 +179,12 @@
             this.load();
             console.log("Now it's" + this.exercise);
             this.entries = [];
+          },
+          newExercise() {
+            console.log("loading new Exercise from populated collection");
+            let entries = this.tasks;
+            let rand = Math.floor(Math.random() * entries.length);
+            this.task = this.tasks[rand];
           },
           control() {
             console.log("controlling...");
