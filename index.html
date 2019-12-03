@@ -51,15 +51,36 @@
           </div>
         </div>
         {{result}}
-        <button class="uk-button uk-button-primary" v-on:click="control">
+        <button
+          class="uk-button uk-button-primary uk-margin-small"
+          v-on:click="control"
+        >
           Kontrollieren
         </button>
-        <button class="uk-button uk-button-danger" v-on:click="erase">
+        <button
+          class="uk-button uk-button-danger uk-margin-small"
+          v-on:click="erase"
+        >
           Übung zurücksetzen
         </button>
-        <button class="uk-button uk-button-default" v-on:click="newExercise">
+        <button
+          class="uk-button uk-button-default uk-margin-small"
+          v-on:click="newExercise"
+        >
           Neue Übung
         </button>
+        <button
+          class="uk-button uk-button-default uk-margin-small"
+          v-on:click="showSolution"
+        >
+          Lösung anzeigen/ verstecken
+        </button>
+        <div v-if="solution">
+          <h2>Lösung:</h2>
+          <ul>
+            <li v-for="solution in task.order">{{solution}}</li>
+          </ul>
+        </div>
       </div>
     </div>
     <hr />
@@ -94,6 +115,7 @@
             tasks: [],
             TrainingTask: {},
             possibleEntries: [],
+            solution: false,
             result:
               "Wähle die korrekten Tatbestandsmerkmale aus und bringe sie in die richtige Reihenfolge"
           };
@@ -185,6 +207,9 @@
             let entries = this.tasks;
             let rand = Math.floor(Math.random() * entries.length);
             this.task = this.tasks[rand];
+          },
+          showSolution() {
+            this.solution = !this.solution;
           },
           control() {
             console.log("controlling...");
