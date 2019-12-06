@@ -20,54 +20,10 @@
     />
     <div class="uk-container uk-container-xsmall">
       <div id="app">
-        <h1>
-          <u uk-toggle="target: #my-id">{{subject}}</u>
-          <u v-on:click="changeExercise" style="cursor: pointer;"
-            >{{exercise}}</u
-          >
-          Trainer
-        </h1>
-        <!-- This is the modal to change the Subject-->
-        <div id="my-id" uk-modal>
-          <div class="uk-modal-dialog uk-modal-body">
-            <h2 class="uk-modal-title">
-              Fachrichtung für Übungen ändern (aktuell: {{subject}})
-            </h2>
-            <div
-              class="uk-child-width-1-2@s uk-grid-collapse uk-text-center"
-              uk-grid
-            >
-              <div>
-                <div
-                  class="uk-tile uk-tile-muted"
-                  style="border:1px solid grey; margin:10px;"
-                  v-on:click="changeSubject('StGB')"
-                >
-                  <p class="uk-h4">StGB AT</p>
-                </div>
-              </div>
-              <div>
-                <div
-                  class="uk-tile uk-tile-muted"
-                  style="border:1px solid grey; margin:10px;"
-                  v-on:click="changeSubject('StGBBT')"
-                >
-                  <p class="uk-h4">StGB BT</p>
-                </div>
-              </div>
-            </div>
-            <button
-              class="uk-modal-close uk-button uk-button-default"
-              type="button"
-            >
-              Schliessen
-            </button>
-          </div>
-        </div>
-        <p>
-          Klicken Sie auf die unterstrichene Fachrichtung oder Übungsart um sie
-          zu ändern.
-        </p>
+        <h1>Strafrecht <u>{{exercise}}</u> Trainer</h1>
+        <button v-on:click="changeExercise" class="uk-button uk-button-default">
+          Übung ändern
+        </button>
         <p>
           {{result}}. Hier ist Deine nächste Aufgabe:
         </p>
@@ -152,8 +108,7 @@
 
         data() {
           return {
-            subject: "StGB",
-            exercise: "Schema",
+            exercise: "Schemata",
             loaded: false,
             entries: [],
             task: {},
@@ -177,40 +132,61 @@
             this.entries = [];
             console.log("LOADING...");
             let self = this; //Promise function can not access this. so we add this to self.
-            console.log("loading" + this.subject + this.exercise);
-            let url =
-              "https://colincarter.me/cp/api/collections/get/Merkmale" +
-              this.subject +
-              this.exercise; //MerkmaleStGBSchema
+            if (this.exercise === "Schemata") {
+              console.log("loading schematas");
+              axios
+                .get(
+                  "https://colincarter.me/cp/api/collections/get/MerkmaleStGBSchema"
+                )
+                .then(function(response) {
+                  // response => (this.tasks = response.entries);
+                  let entries = response.data.entries;
+                  self.tasks = entries;
 
-            axios.get(url).then(function(response) {
-              // response => (this.tasks = response.entries);
-              let entries = response.data.entries;
-              self.tasks = entries;
-
-              let rand = Math.floor(Math.random() * entries.length);
-              self.task = self.tasks[rand];
-              //Possible Entries
-              let possibleEntries = ["Platzhalter"];
-              entries.forEach(element => {
-                element.order.forEach(element => {
-                  //No idea if there's a better option... there probably is...
-                  possibleEntries.push(element);
+                  let rand = Math.floor(Math.random() * entries.length);
+                  self.task = self.tasks[rand];
+                  //Possible Entries
+                  let possibleEntries = ["Platzhalter"];
+                  entries.forEach(element => {
+                    element.order.forEach(element => {
+                      //No idea if there's a better option... there probably is...
+                      possibleEntries.push(element);
+                    });
+                  });
+                  self.possibleEntries = possibleEntries; // Set possible Entries.
+                  console.log(self.task);
                 });
-              });
-              self.possibleEntries = possibleEntries; // Set possible Entries.
-              console.log(self.task);
-            });
-          },
-          changeSubject(subject) {
-            this.subject = subject;
-            this.entries = [];
-            this.load();
+            } else {
+              console.log("loading definitions");
+
+              axios
+                .get(
+                  "https://colincarter.me/cp/api/collections/get/MerkmaleStGBDefinitionen"
+                )
+                .then(function(response) {
+                  // response => (this.tasks = response.entries);
+                  let entries = response.data.entries;
+                  self.tasks = entries;
+
+                  let rand = Math.floor(Math.random() * entries.length);
+                  self.task = self.tasks[rand];
+                  //Possible Entries
+                  let possibleEntries = ["Platzhalter"];
+                  entries.forEach(element => {
+                    element.order.forEach(element => {
+                      //No idea if there's a better option... there probably is...
+                      possibleEntries.push(element);
+                    });
+                  });
+                  self.possibleEntries = possibleEntries; // Set possible Entries.
+                  console.log(self.task);
+                });
+            }
           },
           changeExercise() {
             if (this.exercise === "Definitionen") {
               console.log("it currently is" + this.exercise);
-              this.exercise = "Schema";
+              this.exercise = "Schemata";
               console.log("it changed to" + this.exercise);
               this.result = "Wähle die korrenten Definitionsteile aus.";
             } else {
@@ -246,8 +222,8 @@
               userArray.push(element.textContent.trim());
             });
             let result = true;
-            if (this.exercise === "Schema") {
-              console.log("controlling Schema");
+            if (this.exercise === "Schemata") {
+              console.log("controlling Schemata");
               goalArray.forEach(function(e, i) {
                 if (e === userArray[i]) {
                   console.log("correct");
