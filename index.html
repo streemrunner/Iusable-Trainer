@@ -136,6 +136,14 @@
       Die Inhalte der Übungen stammen von Studierenden an der Universität Basel
       und
       <b> erheben keinen Anspruch auf Richtigkeit oder Aktualität.</b>
+      <br />
+      Diese App ist ein open-source Projekt von
+      <a href="https://colincarter.me" target="_blank">Colin Carter</a>. Der
+      SourceCode kann auf
+      <a href="https://github.com/streemrunner/Iusable-Trainer" target="_blank"
+        >GitHub</a
+      >
+      gefunden werden.
     </div>
     <!-- VUE JS TODO: Load internally-->
     <script src="js/vue.js"></script>
@@ -194,7 +202,7 @@
               let possibleEntries = ["Platzhalter"];
               entries.forEach(element => {
                 element.order.forEach(element => {
-                  //No idea if there's a better option... there probably is...
+                  //No idea if there's a better option than nested forEach... there probably is... Tell me if you know :D
                   possibleEntries.push(element);
                 });
               });
@@ -263,7 +271,7 @@
             } else {
               console.log("controlling Definition");
 
-              //For definitions order isn't not important...
+              //For the definitions the exact order isn't important...
               if (goalArray.length == userArray.length) {
                 goalArray.forEach(function(e, i) {
                   if (!userArray.includes(e)) {
