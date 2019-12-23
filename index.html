@@ -205,11 +205,14 @@
               let rand = Math.floor(Math.random() * entries.length);
               self.task = self.tasks[rand];
               //Possible Entries
-              let possibleEntries = ["Platzhalter"];
+              let possibleEntries = [];
               entries.forEach(element => {
                 element.order.forEach(element => {
                   //No idea if there's a better option than nested forEach... there probably is... Tell me if you know :D
-                  possibleEntries.push(element);
+                  if (!possibleEntries.includes(element)) {
+                    //Check if already in possible Entries... only add if not
+                    possibleEntries.push(element);
+                  }
                 });
               });
               self.possibleEntries = possibleEntries; // Set possible Entries.
