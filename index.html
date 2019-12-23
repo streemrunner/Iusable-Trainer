@@ -76,6 +76,9 @@
           style="border:5px solid grey; padding:25px !important;"
         >
           {{ task.task }}
+          <span v-if="loading">
+            Lädt...
+          </span>
         </div>
         <div id="autocomplete" class="autocomplete">
           <input class="autocomplete-input" id="input" placeholder="..." />
@@ -139,7 +142,7 @@
       <br />
       Diese App ist ein open-source Projekt von
       <a href="https://colincarter.me" target="_blank">Colin Carter</a>. Der
-      SourceCode kann auf
+      Quellcode kann auf
       <a href="https://github.com/streemrunner/Iusable-Trainer" target="_blank"
         >GitHub</a
       >
@@ -147,11 +150,13 @@
     </div>
     <!-- VUE JS TODO: Load internally-->
     <script src="js/vue.js"></script>
+    <!-- AXIOS-->
+    <script src="js/axios.min.js"></script>
     <!-- UIkit JS -->
     <script src="js/uikit.min.js"></script>
     <script src="js/uikit-icons.min.js"></script>
+    <!-- AUTOCOMPLETE-->
     <script src="js/autocomplete.min.js"></script>
-    <script src="js/axios.min.js"></script>
 
     <script>
       //Start Vue
@@ -160,6 +165,7 @@
 
         data() {
           return {
+            loading: true,
             subject: "StGB",
             exercise: "Schema",
             loaded: false,
@@ -195,7 +201,7 @@
               // response => (this.tasks = response.entries);
               let entries = response.data.entries;
               self.tasks = entries;
-
+              self.loading = false;
               let rand = Math.floor(Math.random() * entries.length);
               self.task = self.tasks[rand];
               //Possible Entries
@@ -239,6 +245,7 @@
             let entries = this.tasks;
             let rand = Math.floor(Math.random() * entries.length);
             this.task = this.tasks[rand];
+            this.erase();
           },
           showSolution() {
             this.solution = !this.solution;
