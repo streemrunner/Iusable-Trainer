@@ -4,29 +4,49 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Iusable - Strafrecht Trainer</title>
+    <title>Strafrecht Trainer</title>
     <!-- UIkit CSS -->
     <link rel="stylesheet" href="css/uikit.min.css" />
     <link rel="stylesheet" href="css/autocomplete-style.css" />
+    <style>
+      .inputfile {
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+      }
+    </style>
   </head>
   <body>
-    <img
-      src="iusable.svg"
-      alt="iusable"
-      class="uk-animation-toggle"
-      uk-svg="stroke-animation: true"
-      style="width:150px;
-      padding:25px;"
-    />
     <div class="uk-container uk-container-xsmall">
       <div id="app">
         <h1>
           <u uk-toggle="target: #my-id">{{subject}}</u>
-          <u v-on:click="changeExercise" style="cursor: pointer;"
+          <u v-on:click="changeExercise" style="cursor: pointer"
             >{{exercise}}</u
           >
           Trainer
         </h1>
+        <div>
+          <input
+            type="file"
+            id="selectFiles"
+            class="inputfile"
+            v-on:change="uploadFile()"
+          />
+          <label for="selectFiles" class="uk-button uk-button-default"
+            >Eine eigene JSON-Datei verwenden.</label
+          >
+          <a
+            href="#"
+            uk-toggle="target: #editor"
+            class="uk-button uk-button-default"
+            >Eigene Übung erstellen</a
+          >
+        </div>
+
         <!-- This is the modal to change the Subject-->
         <div id="my-id" uk-modal>
           <div class="uk-modal-dialog uk-modal-body">
@@ -40,7 +60,7 @@
               <div>
                 <div
                   class="uk-tile uk-tile-muted"
-                  style="border:1px solid grey; margin:10px;"
+                  style="border: 1px solid grey; margin: 10px"
                   v-on:click="changeSubject('StGB')"
                 >
                   <p class="uk-h4">StGB AT</p>
@@ -49,7 +69,7 @@
               <div>
                 <div
                   class="uk-tile uk-tile-muted"
-                  style="border:1px solid grey; margin:10px;"
+                  style="border: 1px solid grey; margin: 10px"
                   v-on:click="changeSubject('StGBBT')"
                 >
                   <p class="uk-h4">StGB BT</p>
@@ -64,21 +84,141 @@
             </button>
           </div>
         </div>
+
+        <!-- This is the modal to create own excercises-->
+        <div id="editor" uk-modal>
+          <div class="uk-modal-dialog uk-modal-body">
+            <h2 class="uk-modal-title">Eine eigene Übung erstellen</h2>
+            <ul class="uk-subnav uk-subnav-pill" uk-switcher>
+              <li><a href="#">Aufgabe hinzufügen</a></li>
+              <li><a href="#">Alle Aufgaben</a></li>
+              <li><a href="#">Aufgaben Speichern</a></li>
+            </ul>
+
+            <ul class="uk-switcher uk-margin">
+              <li>
+                <div>
+                  <p style="text-align: left">
+                    Mit diesem Editor kannst Du deine eigene Übung erstellen,
+                    speichern und mit Freunden teilen.
+                  </p>
+                  <br />
+                  <div>
+                    <input
+                      type="text"
+                      id="task"
+                      type="text"
+                      v-model="newTask"
+                      placeholder="Aufgabe"
+                      class="uk-input uk-form-large"
+                    />
+                  </div>
+                  <p>
+                    Füge einzelne Elemente mit dem Button hinzu und achte auf
+                    eine richtige Reihenfolge.
+                  </p>
+                  <div v-for="(item, index) in newOrder">
+                    <input
+                      v-model="item.value"
+                      placeholder="Lösungselement"
+                      class="uk-input uk-form-success"
+                    />
+                  </div>
+                  <button @click="addOrder" class="uk-button uk-button-default">
+                    + Element
+                  </button>
+                  <br />
+                  <button
+                    class="uk-button uk-button-primary uk-margin"
+                    v-on:click="addExercise()"
+                  >
+                    Aufgabe dem aktuellen Übungsset hinzufügen
+                  </button>
+                </div>
+              </li>
+              <li>
+                <h3>Alle Aufgaben</h3>
+                <table class="uk-table uk-table-striped">
+                  <thead>
+                    <tr>
+                      <th>Aufgabe</th>
+                      <th>Lösungselemente in korrekter Reihenfolge</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="task in tasks">
+                      <td>{{task.task}}</td>
+                      <td>
+                        <span class="uk-badge" v-for="element in task.order"
+                          >{{element}}</span
+                        >
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </li>
+              <li>
+                <h3>Speichern</h3>
+                <p>
+                  Mit dem Klick auf den untenstehenden Button wird eine .json
+                  Datei mit allen aktuellen Übungen erstellt und
+                  heruntergeladen. Diese Datei kann geteilt werden und mit dem
+                  Trainer wieder eingelesen werden.
+                </p>
+                <button
+                  @click="exportExercise()"
+                  class="uk-button uk-button-primary"
+                >
+                  Aktuelle Übungen speichern
+                </button>
+              </li>
+            </ul>
+
+            <button
+              class="uk-modal-close uk-button uk-button-default uk-margin"
+              type="button"
+            >
+              Schliessen
+            </button>
+          </div>
+        </div>
+
         <p>
           Klicken Sie auf die unterstrichene Fachrichtung oder Übungsart um sie
           zu ändern.
         </p>
-        <p>
-          {{result}}. Hier ist Deine nächste Aufgabe:
-        </p>
+        <p>{{result}}. Hier ist Deine nächste Aufgabe:</p>
         <div
           class="uk-card uk-card-default uk-card-body uk-margin"
-          style="border:5px solid grey; padding:25px !important;"
+          style="border: 5px solid grey; padding: 25px !important"
         >
           {{ task.task }}
-          <span v-if="loading">
-            Lädt...
-          </span>
+          <span v-if="loading"> Lädt... </span>
+        </div>
+        <div v-if="!easyMode" class="container">
+          <a class="uk-button uk-button-primary" v-on:click="activateEasyMode"
+            >easyMode aktivieren</a
+          >
+          <p>
+            Beim easyMode werden alle möglichen Elemente in einer ungeordneten
+            Liste angezeigt. Ohne den easyMode muss im Suchfeld nach den
+            jeweiligen Elementen gesucht werden.
+          </p>
+        </div>
+        <div v-if="easyMode">
+          <a
+            class="uk-button uk-button-default"
+            v-for="text in easyModeEntries"
+            v-on:click="easyAdd"
+            >{{text}}</a
+          >
+          <br /><br />
+          <a
+            class="uk-button uk-button-primary uk-button-danger"
+            v-on:click="activateEasyMode"
+            style="margin-bottom: 25px"
+            >easyMode deaktivieren</a
+          >
         </div>
         <div id="autocomplete" class="autocomplete">
           <input class="autocomplete-input" id="input" placeholder="..." />
@@ -88,7 +228,7 @@
           <div
             v-for="entry in entries"
             class="uk-card uk-card-default uk-card-body uk-margin entry"
-            style="padding:15px !important;"
+            style="padding: 15px !important"
           >
             <span
               class="uk-sortable-handle uk-margin-small-right"
@@ -114,7 +254,7 @@
           class="uk-button uk-button-default uk-margin-small"
           v-on:click="newExercise"
         >
-          Neue Übung
+          Neue Zufällige Übung
         </button>
         <button
           class="uk-button uk-button-default uk-margin-small"
@@ -131,7 +271,7 @@
       </div>
     </div>
     <hr />
-    <div style="text-align:center;" class="uk-container uk-container-xsmall">
+    <div style="text-align: center" class="uk-container uk-container-xsmall">
       <br />
       Dieser Trainer soll das spielerische Üben von Schemata und Definitionen in
       Stichworten ermöglichen. Für Hinweise auf Fehler oder für
@@ -166,17 +306,22 @@
         data() {
           return {
             loading: true,
+            easyMode: false,
+            easyModeEntries: [],
             subject: "StGB",
             exercise: "Schema",
             loaded: false,
             entries: [],
             task: {},
             tasks: [],
+            localTasks: [],
             TrainingTask: {},
             possibleEntries: [],
+            newTask: "",
+            newOrder: [],
             solution: false,
             result:
-              "Wähle die korrekten Tatbestandsmerkmale aus und bringe sie in die richtige Reihenfolge"
+              "Wähle die korrekten Tatbestandsmerkmale aus und bringe sie in die richtige Reihenfolge",
           };
         },
         mounted() {
@@ -187,17 +332,59 @@
           erase() {
             this.entries = [];
           },
+          uploadFile() {
+            console.log("uploading...");
+            let localTasks;
+            let self = this;
+            let isLoading = this.loading;
+            let error = false;
+            isLoading = true;
+
+            var file = document.getElementById("selectFiles").files[0];
+            if (file) {
+              var reader = new FileReader();
+              reader.readAsText(file, "UTF-8");
+              reader.onload = function (evt) {
+                localTasks = JSON.parse(evt.target.result);
+                isLoading = false;
+                console.log(localTasks[0].entries);
+                console.log("setting tasks from local file...");
+                localTasks[0].entries.forEach((e) => {
+                  self.tasks.push(e);
+                  console.log(e);
+                });
+              };
+              reader.onerror = function (evt) {
+                alert("error reading file");
+                error = true;
+              };
+
+              //this.localTasks = localTasks;
+            }
+
+            // var upload = document.getElementById("selectFiles");
+
+            // if (upload.files.length > 0) {
+            //   var reader = new FileReader(); // File reader to read the file
+            //   let result;
+            //   // This event listener will happen when the reader has read the file
+            //   reader.addEventListener("load", function () {
+            //     console.log(JSON.parse(reader.result)); // Parse the result into an object
+            //     console.log(result);
+            //   });
+
+            //   //console.log(result);
+            //   this.tasks = reader.readAsText(upload.files[0]); // Read the uploaded file
+            // }
+          },
           load() {
             this.entries = [];
             console.log("LOADING...");
             let self = this; //Promise function can not access this. so we add this to self.
             console.log("loading" + this.subject + this.exercise);
-            let url =
-              "https://colincarter.me/cp/api/collections/get/Merkmale" +
-              this.subject +
-              this.exercise; //MerkmaleStGBSchema
+            let url = "data/" + this.subject + this.exercise + ".json"; //MerkmaleStGBSchema
 
-            axios.get(url).then(function(response) {
+            axios.get(url).then(function (response) {
               // response => (this.tasks = response.entries);
               let entries = response.data.entries;
               self.tasks = entries;
@@ -206,8 +393,8 @@
               self.task = self.tasks[rand];
               //Possible Entries
               let possibleEntries = [];
-              entries.forEach(element => {
-                element.order.forEach(element => {
+              entries.forEach((element) => {
+                element.order.forEach((element) => {
                   //No idea if there's a better option than nested forEach... there probably is... Tell me if you know :D
                   if (!possibleEntries.includes(element)) {
                     //Check if already in possible Entries... only add if not
@@ -243,6 +430,52 @@
             console.log("Now it's" + this.exercise);
             this.entries = [];
           },
+          activateEasyMode() {
+            // this.easyModeEntries = this.task.order; // Set easyMode Entries.
+            this.easyMode = !this.easyMode;
+            if (this.easyMode && this.easyModeEntries.length < 1) {
+              this.task.order.forEach((e) => {
+                this.easyModeEntries.push(e);
+                console.log(e);
+              });
+            }
+          },
+          addOrder: function () {
+            this.newOrder.push({ value: "" });
+          },
+          addExercise() {
+            let exOrder = [];
+            this.newOrder.forEach((item) => {
+              exOrder.push(item.value);
+            });
+            let newExercise = {
+              task: this.newTask,
+              order: exOrder,
+            };
+            this.tasks.push(newExercise);
+            //reset
+            this.newOrder = [];
+            this.newTask = "";
+          },
+          exportExercise() {
+            let dataStr = JSON.stringify(this.tasks);
+            let dataUri =
+              "data:application/json;charset=utf-8," +
+              encodeURIComponent(dataStr);
+
+            let exportFileDefaultName = "data.json";
+
+            let linkElement = document.createElement("a");
+            linkElement.setAttribute("href", dataUri);
+            linkElement.setAttribute("download", exportFileDefaultName);
+            linkElement.click();
+          },
+          easyAdd(e) {
+            console.log(e.srcElement.text);
+            this.entries.push({ text: String(e.srcElement.text) });
+            let index = this.easyModeEntries.indexOf(e.srcElement.text);
+            this.easyModeEntries.splice(index, 1);
+          },
           newExercise() {
             console.log("loading new Exercise from populated collection");
             let entries = this.tasks;
@@ -260,13 +493,13 @@
             //populate userArray:
             let allElements = document.getElementsByClassName("entry"); //returns HTML-Collection, not array
             var arr = [].slice.call(allElements); //Converting to Array.
-            arr.forEach(element => {
+            arr.forEach((element) => {
               userArray.push(element.textContent.trim());
             });
             let result = true;
             if (this.exercise === "Schema") {
               console.log("controlling Schema");
-              goalArray.forEach(function(e, i) {
+              goalArray.forEach(function (e, i) {
                 if (e === userArray[i]) {
                   console.log("correct");
                   document.getElementsByClassName("entry")[i].style.border =
@@ -283,7 +516,7 @@
 
               //For the definitions the exact order isn't important...
               if (goalArray.length == userArray.length) {
-                goalArray.forEach(function(e, i) {
+                goalArray.forEach(function (e, i) {
                   if (!userArray.includes(e)) {
                     result = false;
                     document.getElementsByClassName("entry")[i].style.border =
@@ -303,26 +536,26 @@
             } else {
               this.result = "Etwas stimmt noch nicht ganz...";
             }
-          }
-        }
+          },
+        },
       });
 
       //Autocomplete
 
       let options = {
-        search: input => {
+        search: (input) => {
           if (input.length < 1) {
             return [];
           }
-          return app.possibleEntries.filter(entry => {
+          return app.possibleEntries.filter((entry) => {
             return entry.toLowerCase().startsWith(input.toLowerCase());
           });
         },
-        onSubmit: result => {
+        onSubmit: (result) => {
           //add data to vue App
           app.entries.push({ text: result });
           document.getElementById("input").value = "";
-        }
+        },
       };
       new Autocomplete("#autocomplete", options);
 

@@ -1,0 +1,14 @@
+[
+  {
+    "entries": [
+      {
+        "task": "Eine lokale Aufgabe",
+        "order": ["X", "Y", "Z"]
+      },
+      {
+        "task": "Eine andere lokale Aufgabe",
+        "order": ["XY", "YZ", "ZZ"]
+      }
+    ]
+  }
+]

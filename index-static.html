@@ -16,12 +16,10 @@
         <button v-on:click="changeExercise" class="uk-button uk-button-default">
           Übung ändern
         </button>
-        <p>
-          {{result}}. Hier ist Deine nächste Aufgabe:
-        </p>
+        <p>{{result}}. Hier ist Deine nächste Aufgabe:</p>
         <div
           class="uk-card uk-card-default uk-card-body uk-margin"
-          style="border:5px solid grey; padding:25px !important;"
+          style="border: 5px solid grey; padding: 25px !important"
         >
           {{ task.task }}
         </div>
@@ -33,7 +31,7 @@
           <div
             v-for="entry in entries"
             class="uk-card uk-card-default uk-card-body uk-margin entry"
-            style="padding:15px !important;"
+            style="padding: 15px !important"
           >
             <span
               class="uk-sortable-handle uk-margin-small-right"
@@ -60,7 +58,7 @@
       let possibleEntries;
       let possibleEntriesDefinitionen = [
         "Besondere Grausamkeit/Heimtücke",
-        "Gesamtwürdigung"
+        "Gesamtwürdigung",
       ];
       let possibleEntriesSchemata = [
         "Objektiver Tatbestand",
@@ -69,15 +67,15 @@
         "Vorstatz",
         "Rechtswidrigkeit",
         "Schuld",
-        "Ergebnis"
+        "Ergebnis",
       ];
       //Training tasks
       let tasks;
       let tasksDefinitionen = [
         {
           task: "Definition: Skrupellosigkeit",
-          order: ["Besondere Grausamkeit/Heimtücke", "Gesamtwürdigung"]
-        }
+          order: ["Besondere Grausamkeit/Heimtücke", "Gesamtwürdigung"],
+        },
       ];
       let tasksSchemata = [
         {
@@ -89,13 +87,13 @@
             "Vorstatz",
             "Rechtswidrigkeit",
             "Schuld",
-            "Ergebnis"
-          ]
+            "Ergebnis",
+          ],
         },
         {
           task: "Obj Subj",
-          order: ["Objektiver Tatbestand", "Subjektiver Tatbestand"]
-        }
+          order: ["Objektiver Tatbestand", "Subjektiver Tatbestand"],
+        },
       ];
 
       //setDefault
@@ -110,7 +108,7 @@
           entries: [],
           task: {},
           result:
-            "Wähle die korrekten Tatbestandsmerkmale aus und bringe sie in die richtige Reihenfolge"
+            "Wähle die korrekten Tatbestandsmerkmale aus und bringe sie in die richtige Reihenfolge",
         },
 
         methods: {
@@ -118,7 +116,7 @@
             if (this.exercise === "Definitionen") {
               this.exercise = "Schemata";
               this.result =
-                "Wähle die korrenten Definitionsteile aus und bringe sie in die richtie Reihenfolge";
+                "Wähle die korrekten Definitionsteile aus und bringe sie in die richtie Reihenfolge";
               possibleEntries = possibleEntriesSchemata;
               tasks = tasksSchemata;
               //Set Training Task
@@ -137,26 +135,26 @@
               app.task = TrainingTask;
             }
             this.entries = [];
-          }
-        }
+          },
+        },
       });
 
       //Autocomplete
 
       let options = {
-        search: input => {
+        search: (input) => {
           if (input.length < 1) {
             return [];
           }
-          return possibleEntries.filter(entry => {
+          return possibleEntries.filter((entry) => {
             return entry.toLowerCase().startsWith(input.toLowerCase());
           });
         },
-        onSubmit: result => {
+        onSubmit: (result) => {
           //add data to vue App
           app.entries.push({ text: result });
           document.getElementById("input").value = "";
-        }
+        },
       };
       new Autocomplete("#autocomplete", options);
 
@@ -174,11 +172,11 @@
         //populate userArray:
         let allElements = document.getElementsByClassName("entry"); //returns HTML-Collection, not array
         var arr = [].slice.call(allElements); //Converting to Array.
-        arr.forEach(element => {
+        arr.forEach((element) => {
           userArray.push(element.textContent.trim());
         });
         let result = true;
-        goalArray.forEach(function(e, i) {
+        goalArray.forEach(function (e, i) {
           if (e === userArray[i]) {
             console.log("correct");
             document.getElementsByClassName("entry")[i].style.border =
